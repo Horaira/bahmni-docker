@@ -45,9 +45,13 @@ function checkIfDirectoryIsCorrect {
 }
 
 function start {
+    echo "login to docker"
+    cat ./docker_pass.txt | docker login --username indiclinic --password-stdin
     echo "Executing command: 'docker compose up -d'"
     echo "Starting Bahmni with default profile from .env file"
     docker compose up -d
+    echo "Loging out from docker"
+    docker logout indiclinic
 }
 
 

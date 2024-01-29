@@ -29,7 +29,7 @@ services:
       TZ: ${TZ}
 
   bahmni-config:
-    image: 'bahmni/clinic-config:${CONFIG_IMAGE_TAG:?}'
+    image: 'registry.hub.docker.com/indiclinic/clinic-config:${CONFIG_IMAGE_TAG:?}'
     volumes:
       - '${CONFIG_VOLUME:?}:/usr/local/bahmni_config'
     logging: *log-config
@@ -228,7 +228,7 @@ services:
      - 'bahmni-clinical-forms:/home/bahmni/clinical_forms'
 
   bahmni-web:
-    image: bahmni/bahmni-web:${BAHMNI_WEB_IMAGE_TAG:?}
+    image: registry.hub.docker.com/indiclinic/bahmni-web:${BAHMNI_WEB_IMAGE_TAG:?}
     profiles: ["emr","bahmni-lite","bahmni-mart"]
     volumes:
       - "${CONFIG_VOLUME:?}:/usr/local/apache2/htdocs/bahmni_config/:ro"
