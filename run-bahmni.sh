@@ -181,6 +181,21 @@ function shutdown {
     exit 0
 }
 
+#reading option from command line
+
+skip_user_input=0
+echo $#
+
+if [ $# -eq 0 ]; then
+  echo "No Command Line Argument"
+else
+  op_param1=$1
+  echo "Option param Value"
+  echo $op_param1
+  skip_user_input=1
+fi
+
+
 # Check Docker Compose versions first
 checkDockerAndDockerComposeVersion
 # Check Directory is correct
@@ -199,7 +214,13 @@ echo "8) RESET and ERASE All Volumes/Databases from docker!"
 echo "9) RESTART a service"
 echo "0) STATUS of all services"
 echo "-------------------------"
-read option
+
+if [ $skip_user_input -eq 0 ]; then
+  read option
+else
+  echo "using option provided at command line"
+  option=$op_param1
+fi 
 
 case $option in
     1) start;;
