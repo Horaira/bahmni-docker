@@ -1,11 +1,12 @@
 #!/bin/bash
 
 echo "this would be triggered through systemd"
-date >  $(date +"%Y_%m_%d_%I_%M_%p").log
+who >> log.txt
+date >>  log.txt
 git checkout experiment/custom-configuration-on-tag-1.0.0-lite
 git pull origin
-cd ./bahmni-lite/
-date > $(date +"%Y_%m_%d_%I_%M_%p").log
+cd ./bahmni-lite
+pwd >> log.txt
 ./run-bahmni.sh 1
 docker ps >> log.txt
 
