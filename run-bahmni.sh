@@ -45,41 +45,37 @@ function checkIfDirectoryIsCorrect {
 }
 
 function start {
-    echo "login to docker"
-    cat ./docker_pass.txt | docker login --username indiclinic --password-stdin
-    echo "Executing command: 'docker compose up -d'"
-    echo "Starting Bahmni with default profile from .env file"
-    docker compose up -d
-    echo "Loging out from docker"
-    docker logout indiclinic
+    echo "Executing command: 'docker compose up -d' with the images specified in the $file file"
+    echo "Starting Bahmni with default profile from $file file"
+    docker compose --env-file "$file" up -d
 }
 
 
 function stop {
     echo "Executing command: 'docker compose down' with all profiles"
-    docker compose --profile emr --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart down
+    docker compose --env-file "$file" --profile emr --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart down
 }
 
 function sshIntoService {
     # Using all profiles, so that we can status of all services
     echo "Listing the running services..."
-    docker compose --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart ps
+    docker compose --env-file "$file" --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart ps
 
     echo "Enter the SERVICE name which you wish to ssh into:"
     read serviceName
     
-    docker compose exec $serviceName /bin/sh
+    docker compose --env-file "$file" exec $serviceName /bin/sh
 }
 
 function showLogsOfService {
     # Using all profiles, so that we can status of all services
     echo "Listing the running services..."
-    docker compose --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart ps
+    docker compose --env-file "$file" --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart ps
 
     echo "Enter the SERVICE name whose logs you wish to see:"
     read serviceName
     
-    docker compose logs $serviceName -f
+    docker compose --env-file "$file" logs $serviceName -f
 }
 
 
@@ -90,18 +86,18 @@ function showOpenMRSlogs {
 
 function startMart {
     echo "Starting services with profile 'bahmni-mart'..."
-    docker compose --profile bahmni-mart up -d
+    docker compose --env-file "$file" --profile bahmni-mart up -d
 }
 
 function pullLatestImages {
-    echo "Pulling all latest images..."
-    docker compose pull
+    echo "Pulling all the images specified in the $file file..."
+    docker compose --env-file "$file" pull
 }
 
 function showStatus {
     echo "Listing status of running Services with command: 'docker compose ps'"
     # Using all profiles, so that we can status of all services
-    docker compose --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart ps
+    docker compose --env-file "$file" --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart ps
 
 }
 
@@ -131,12 +127,12 @@ function resetAndEraseALLVolumes {
     echo "Proceeding with a DELETE.... "
     
     echo "1. Stopping all services, using all profiles.."
-    docker compose --profile emr --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart down
+    docker compose --env-file "$file" --profile emr --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart down
     
-    docker compose ps
+    docker compose --env-file "$file" ps
     
     echo "2. Deleting all volumes (-v) .."
-    docker compose --profile emr --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart down -v
+    docker compose --env-file "$file" --profile emr --profile bahmni-lite --profile bahmni-standard --profile bahmni-mart down -v
     RESULT=$?
     if [ $RESULT -eq 0 ]; then
         echo "Volumes deleted successfully."
@@ -161,17 +157,17 @@ function resetAndEraseALLVolumes {
 
 function restartService {
     # One can ONLY restart services in current profile (limitation of docker compose restart command). 
-    echo "Listing the running services from current profile (.env file) that can be restarted..."
-    docker compose ps
+    echo "Listing the running services from current profile ($file file) that can be restarted..."
+    docker compose --env-file "$file" ps
 
     echo "Enter the name of the SERVICE to restart:"
     read serviceName
     
     echo "Restarting SERVICE: $serviceName"
-    docker compose restart $serviceName
+    docker compose --env-file "$file" restart $serviceName
 
     if confirm "Do you want to see the service logs?"; then
-        docker compose logs $serviceName -f
+        docker compose --env-file "$file" logs $serviceName -f
     fi
 }
 
@@ -184,15 +180,18 @@ function shutdown {
 #reading option from command line
 
 skip_user_input=0
-echo $#
-
-if [ $# -eq 0 ]; then
-  echo "No Command Line Argument"
-else
-  op_param1=$1
-  echo "Option param Value"
-  echo $op_param1
+if [ $# -eq 2 ]; then
+  echo "Both arguments provided as argument in command line"
+  echo "CMD Line Arg 1 : which env file to use, .env / .env.dev"
+  echo "CMD Line Arg 2 : what action to do?"
+  op_param1=$2
   skip_user_input=1
+elif [ $# -eq 1 ]; then
+  echo "one argument provided"
+  echo "CMD Line Arg 1 : which env file to use, .env / .env.dev"
+  echo "CMD Line Arg 2 : what action to do?"
+else
+  echo "No command line option provided"
 fi
 
 
@@ -200,6 +199,9 @@ fi
 checkDockerAndDockerComposeVersion
 # Check Directory is correct
 checkIfDirectoryIsCorrect
+
+echo "login to docker"
+cat ./docker_pass.txt | docker login --username indiclinic --password-stdin
 
 echo "Please select an option:"
 echo "------------------------"
@@ -222,16 +224,24 @@ else
   option=$op_param1
 fi 
 
+file=".env"
+if ! [ "$1" == "" ]; then
+    file="$1"
+fi
 case $option in
-    1) start;;
-    2) stop;;
+    1) start $file;;
+    2) stop $file;;
     3) showOpenMRSlogs;;
-    4) showLogsOfService;;
-    5) sshIntoService;;
-    6) startMart;;
-    7) pullLatestImages;;
-    8) resetAndEraseALLVolumes;;
-    9) restartService;;
-    0) showStatus;;   
+    4) showLogsOfService $file;;
+    5) sshIntoService $file;;
+    6) startMart $file;;
+    7) pullLatestImages $file;;
+    8) resetAndEraseALLVolumes $file;;
+    9) restartService $file;;
+    0) showStatus $file;;
     *) echo "Invalid option selected";;
 esac
+
+echo "Loging out from docker"
+docker logout indiclinic
+
