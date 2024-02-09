@@ -29,10 +29,10 @@ services:
       TZ: ${TZ}
 
   bahmni-config:
-    image: 'registry.hub.docker.com/indiclinic/clinic-config:${CONFIG_IMAGE_TAG:?}'
-    volumes:
-      - '${CONFIG_VOLUME:?}:/usr/local/bahmni_config'
-    logging: *log-config
+     image: 'registry.hub.docker.com/indiclinic/clinic-config:${CONFIG_IMAGE_TAG:?}'
+     volumes:
+       - '${CONFIG_VOLUME:?}:/usr/local/bahmni_config'
+     logging: *log-config
 
   bahmni-lab:
     profiles: ["lab-lite","emr","bahmni-lite"]
