@@ -25,6 +25,7 @@ services:
       - '80:80'
       - '443:443'
     logging: *log-config
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
 
@@ -33,11 +34,13 @@ services:
     volumes:
       - '${CONFIG_VOLUME:?}:/usr/local/bahmni_config'
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   bahmni-lab:
     profiles: ["lab-lite","emr","bahmni-lite"]
     image: 'bahmni/bahmni-lab:${BAHMNI_LAB_IMAGE_TAG:?}'
     logging: *log-config
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
 
@@ -69,6 +72,9 @@ services:
       MAIL_PASSWORD: ${MAIL_PASSWORD}
       OMRS_DOCKER_ENV: ${OPENMRS_DOCKER_ENV}
       OMRS_C3P0_MAX_SIZE: ${OMRS_C3P0_MAX_SIZE}
+      OMRS_DB_EXTRA_ARGS: ${OMRS_DB_EXTRA_ARGS}
+      LUCENE_MATCH_TYPE: ${LUCENE_MATCH_TYPE}
+      DOCUMENT_MAX_SIZE_MB: ${DOCUMENT_MAX_SIZE_MB}
     #ports:
       # - ${OMRS_DEV_DEBUG_PORT}:${OMRS_DEV_DEBUG_PORT}
     volumes:
@@ -85,6 +91,7 @@ services:
     depends_on:
       - openmrsdb
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   openmrsdb:
     image: ${OPENMRS_DB_IMAGE_NAME:?}
@@ -127,6 +134,7 @@ services:
       COMPANY_NAME: ${CRATER_COMPANY_NAME:?}
       COMPANY_SLUG: ${CRATER_COMPANY_SLUG:?}
       COUNTRY_ID: ${CRATER_COUNTRY_ID:?}
+      CRATER_DEFAULT_CURRENCY: ${CRATER_DEFAULT_CURRENCY:?}
       APP_DEBUG: ${CRATER_APP_DEBUG:?}
 
   crater-nginx:
@@ -199,6 +207,7 @@ services:
   martdb:
     image: postgres:${BAHMNI_MART_DB_IMAGE_TAG:?}
     profiles: ["bahmni-mart"]
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
       POSTGRES_DB: ${MART_DB_NAME:?}
@@ -211,6 +220,7 @@ services:
   mart:
     image: bahmni/bahmni-mart:${BAHMNI_MART_IMAGE_TAG:?}
     profiles: ["bahmni-mart"]
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
       CRON_TIME: ${MART_CRON_TIME:?}
@@ -239,6 +249,7 @@ services:
     #   - "${BAHMNI_APPS_PATH:?}/ui/app/:/usr/local/apache2/htdocs/bahmni"
     #   - "${BAHMNI_APPS_PATH:?}/ui/node_modules/@bower_components/:/usr/local/apache2/htdocs/bahmni/components"
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   implementer-interface:
     image: bahmni/implementer-interface:${IMPLEMENTER_INTERFACE_IMAGE_TAG:?}
@@ -248,6 +259,7 @@ services:
     depends_on:
       - openmrs
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   reports:
     image: bahmni/reports:${REPORTS_IMAGE_TAG:?}
@@ -272,6 +284,7 @@ services:
       - openmrsdb
       - bahmni-web
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   reportsdb:
     platform: linux/amd64
@@ -286,6 +299,7 @@ services:
     volumes:
       - 'reportsdbdata:/var/lib/mysql'
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   patient-documents:
     image: 'bahmni/patient-documents:${PATIENT_DOCUMENTS_TAG:?}'
@@ -300,16 +314,19 @@ services:
     depends_on:
       - openmrs
     logging: *log-config
+    restart: ${RESTART_POLICY}
 
   appointments:
     image: bahmni/appointments:${APPOINTMENTS_IMAGE_TAG:?}
     profiles: ["emr","bahmni-lite"]
+    restart: ${RESTART_POLICY}
     # volumes:
     # - "${APPOINTMENTS_PATH:?}/dist/:/usr/local/apache2/htdocs/appointments"
 
   sms-service:
     image: bahmni/sms-service:${SMS_SERVICE_IMAGE_TAG:?}
     profiles: ["sms"]
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
       SMS_TOKEN: ${SMS_TOKEN}
@@ -324,6 +341,7 @@ services:
   atomfeed-console:
     image: bahmni/atomfeed-console:latest
     profiles: ["atomfeed-console"]
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
       OPENMRS_DB_HOST: ${OPENMRS_DB_HOST}
@@ -334,6 +352,7 @@ services:
   crater-atomfeed:
     image: bahmni/crater-atomfeed:${CRATER_ATOMFEED_IMAGE_TAG:?}
     profiles: ["crater","bahmni-lite"]
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
       OPENMRS_HOST: ${OPENMRS_HOST:?}
@@ -353,6 +372,7 @@ services:
     platform: linux/amd64
     image: mysql:5.7
     profiles: ["crater","bahmni-lite"]
+    restart: ${RESTART_POLICY}
     environment:
       TZ: ${TZ}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
