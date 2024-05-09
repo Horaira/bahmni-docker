@@ -33,6 +33,11 @@ services:
      volumes:
        - '${CONFIG_VOLUME:?}:/usr/local/bahmni_config'
      logging: *log-config
+     
+  indic:
+    image: 136220410893.dkr.ecr.ap-south-1.amazonaws.com/indic:indic-docker-1.1
+    environment:
+      AWS_DEFAULT_REGION: ap-south-1
 
   bahmni-lab:
     profiles: ["lab-lite","emr","bahmni-lite"]

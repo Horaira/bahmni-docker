@@ -47,9 +47,12 @@ function checkIfDirectoryIsCorrect {
 function start {
     echo "login to docker"
     cat ./docker_pass.txt | docker login --username indiclinic --password-stdin
+    echo "Login to AWS registry"                                                                   
+    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 136220410893.dkr.ecr.ap-south-1.amazonaws.com
     echo "Executing command: 'docker compose up -d'"
     echo "Starting Bahmni with default profile from .env file"
     docker compose up -d
+    docker logout 136220410893.dkr.ecr.ap-south-1.amazonaws.com
     echo "Loging out from docker"
     docker logout indiclinic
 }
