@@ -18,7 +18,7 @@ x-log-config: &log-config
 services:
 
   proxy:
-    image: 'bahmni/proxy:${PROXY_IMAGE_TAG:?}'
+    image: 'indiclinic/proxy:${PROXY_IMAGE_TAG:?}'
     #volumes:
       # - ${CERTIFICATE_PATH}:/etc/tls
     ports:
